@@ -1,15 +1,16 @@
-all: BIN BINARYSEARCH LINEARSEARCH
+all: clean BIN BINARYSEARCH LINEARSEARCH
 
 BIN:
 	mkdir bin/
 
-BINARYSEARCH: BIN
+BINARYSEARCH: clean BIN
 	g++ -pthread -o bin/binary_pthread BinarySearch/binarypthreads.cpp
 	mpic++ -o bin/binary_mpi BinarySearch/binarympi.cpp
 
-LINEARSEARCH: BIN
+LINEARSEARCH: clean BIN
 	g++ -pthread -o bin/linear_pthread LinearSearch/linearpthreads.cpp
-	g++ -o bin/linear_single_thread LinearSearch/linearsinglethread.cpp
+	g++ -o bin/linear LinearSearch/linear.cpp
+	mpic++ -o bin/linear_mpi LinearSearch/linearmpi.cpp
 
 
 run:
