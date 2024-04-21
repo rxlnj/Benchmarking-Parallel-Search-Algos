@@ -1,17 +1,26 @@
-all: clean BIN BINARYSEARCH LINEARSEARCH
+ifeq ($(OS),Windows_NT)
+    RM = Del /s /q
+    MKDIR = mkdir
+    EXE_EXT = .exe
+else
+    RM = rm -rf
+    MKDIR = mkdir -p
+    EXE_EXT =
+endif
+
+all:  BIN BINARYSEARCH LINEARSEARCH
 
 BIN:
-	mkdir bin/
+	$(MKDIR) bin
 
-BINARYSEARCH: clean BIN
-	g++ -pthread -o bin/binary_pthread BinarySearch/binarypthreads.cpp
-	mpic++ -o bin/binary_mpi BinarySearch/binarympi.cpp
+BINARYSEARCH: BIN
+	g++ -pthread -o bin/binary_pthread$(EXE_EXT) BinarySearch/binarypthreads.cpp
+	mpic++ -o bin/binary_mpi$(EXE_EXT) BinarySearch/binarympi.cpp
 
-LINEARSEARCH: clean BIN
-	g++ -pthread -o bin/linear_pthread LinearSearch/linearpthreads.cpp
-	g++ -o bin/linear LinearSearch/linear.cpp
-	mpic++ -o bin/linear_mpi LinearSearch/linearmpi.cpp
-
+LINEARSEARCH: BIN
+	g++ -pthread -o bin/linear_pthread$(EXE_EXT) LinearSearch/linearpthreads.cpp
+	g++ -o bin/linear$(EXE_EXT) LinearSearch/linear.cpp
+	mpic++ -o bin/linear_mpi$(EXE_EXT) LinearSearch/linearmpi.cpp
 
 run:
 ifeq ($(MPI), 1)
@@ -21,7 +30,4 @@ else
 endif
 
 clean:
-	rm -rf bin/
-
-
-
+	$(RM) bin/
