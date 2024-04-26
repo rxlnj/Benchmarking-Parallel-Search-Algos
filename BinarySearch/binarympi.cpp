@@ -3,6 +3,7 @@
 #include <mpi/mpi.h>
 #include <vector>
 #include <fstream>
+#include <iostream>
 
 int binary_search(int arr[], int key, int begin, int end) {
     if (begin <= end) {
@@ -54,7 +55,7 @@ int main(int argc, char* argv[]) {
 
         file.close();
 
-        int key = 220;
+        long long key = 820767;
         int elements_per_process = _arr.size() / number_of_processes;
         bool found = 0;
 

@@ -26,9 +26,9 @@ LINEARSEARCH: BIN
 
 run:
 ifeq ($(MPI), 1)
-	mpirun -n ${n} bin/${file} Testcases/test_1.txt
+	mpirun -n ${n} bin/${file} Testcases/${data}.txt
 else
-	./bin/${file} Testcases/dataset_100000.txt
+	./bin/${file} Testcases/${data}.txt
 endif
 
 clean:
