@@ -5,7 +5,7 @@
 #include <fstream>
 #include <iostream>
 
-int linear_search(int arr[], int key, int size) {
+int linear_search(long long arr[], long long key, int size) {
     for (int i = 0; i < size; i++) {
         if (arr[i] == key) {
             return i;
@@ -45,15 +45,15 @@ int main(int argc, char* argv[]) {
             _arr.push_back(value);
         }
 
-        int arr[_arr.size()];
+        long long *arr = new long long[_arr.size()];
         std::copy(_arr.begin(), _arr.end(), arr);
 
         file.close();
 
         double start = MPI_Wtime();
         long long key = 820767;
-        int elements_per_process = _arr.size() / number_of_processes;
-        int remaining_elements = _arr.size() % number_of_processes;
+        long long elements_per_process = _arr.size() / number_of_processes;
+        long long remaining_elements = _arr.size() % number_of_processes;
         bool found = false;
 
         // Linear search on master process
@@ -67,7 +67,7 @@ int main(int argc, char* argv[]) {
 
         // Pack and send information to other processes
         int send_count;
-        int send_buffer[3];
+        long long send_buffer[3];
         MPI_Request* requests = new MPI_Request[2 * number_of_processes];
         for (i = 1; i < number_of_processes; i++) {
             start_index = i * elements_per_process + (i <= remaining_elements ? i : remaining_elements);
@@ -75,48 +75,51 @@ int main(int argc, char* argv[]) {
             send_buffer[0] = key;
             send_buffer[1] = start_index;
             send_buffer[2] = end_index - start_index + 1;
-            MPI_Isend(send_buffer, 3, MPI_INT, i, 0, MPI_COMM_WORLD, &requests[(i - 1) * 2]);
-            MPI_Isend(&arr[start_index], end_index - start_index + 1, MPI_INT, i, 0, MPI_COMM_WORLD, &requests[(i - 1) * 2 + 1]);
+            MPI_Isend(send_buffer, 3, MPI_LONG_LONG_INT, i, 0, MPI_COMM_WORLD, &requests[(i - 1) * 2]);
+            MPI_Isend(&arr[start_index], end_index - start_index + 1, MPI_LONG_LONG_INT, i, 0, MPI_COMM_WORLD, &requests[(i - 1) * 2 + 1]);
         }
 
         // Receive result from other processes and analyze the result
         MPI_Status recv_status;
-        int recv_buffer[3];
+        long long recv_buffer[3];
         for (i = 1; i < number_of_processes; i++) {
-            MPI_Recv(&recv_buffer, 3, MPI_INT, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &recv_status);
+            MPI_Recv(&recv_buffer, 3, MPI_LONG_LONG_INT, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &recv_status);
             index = recv_buffer[0];
             start_index = recv_buffer[1];
-            int num_of_elements_received = recv_buffer[2];
+            long long num_of_elements_received = recv_buffer[2];
             if (index != -1) {
                 global_index = start_index + index;
-                printf("The key %d is found at index %d\n", key, global_index);
+                printf("The key %lld is found at index %lld\n", key, global_index);
                 found = true;
             }
         }
 
         if (!found) {
-            printf("The key %d is not found\n", key);
+            printf("The key %lld is not found\n", key);
         }
         double end = MPI_Wtime();
         printf("Time taken to search: %.8lfms\n", (end - start) * 1000);
 
+        delete[] arr;
         delete[] requests;
     } else {
         // Other processes: Receive info from master process, do linear search, and send the results back to master process
         MPI_Status recv_status;
-        int recv_buffer[3];
-        MPI_Recv(&recv_buffer, 3, MPI_INT, 0, 0, MPI_COMM_WORLD, &recv_status);
-        int key = recv_buffer[0];
-        int start_index = recv_buffer[1];
-        int num_of_elements_received = recv_buffer[2];
-        int buffer[num_of_elements_received];
-        MPI_Recv(&buffer, num_of_elements_received, MPI_INT, 0, 0, MPI_COMM_WORLD, &status);
+        long long recv_buffer[3];
+        MPI_Recv(&recv_buffer, 3, MPI_LONG_LONG_INT, 0, 0, MPI_COMM_WORLD, &recv_status);
+        long long key = recv_buffer[0];
+        long long start_index = recv_buffer[1];
+        long long num_of_elements_received = recv_buffer[2];
+        long long *buffer = new long long[num_of_elements_received];
+        MPI_Recv(buffer, num_of_elements_received, MPI_LONG_LONG_INT, 0, 0, MPI_COMM_WORLD, &status);
         index = linear_search(buffer, key, num_of_elements_received);
 
-        int send_buffer[2];
+        long long send_buffer[2];
         send_buffer[0] = index;
         send_buffer[1] = start_index;
-        MPI_Send(send_buffer, 2, MPI_INT, 0, 0, MPI_COMM_WORLD);
+        MPI_Send(send_buffer, 2, MPI_LONG_LONG_INT, 0, 0, MPI_COMM_WORLD);
+
+        delete[] buffer;
     }
 
     MPI_Finalize();
