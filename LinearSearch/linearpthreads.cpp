@@ -1,50 +1,44 @@
+// CPP Program to perform linear search using pthreads
+
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <pthread.h>
 #include <vector>
+#include <string>
+#include <chrono>
 using namespace std;
 
-// Max size of array
-#define max 30
+#define MAX_THREAD 4
 
-// Max number of threads to create
-#define thread_max 4
+bool found = false;
+int part = 0;
+int key = 820767; // Key to search
 
-// Global variables
-int a[max];
-int key = 202;
-int f = 0;
-int current_thread = 0;
+struct ThreadArgs {
+    int start;
+    int end;
+    vector<int>* arr; 
+};
 
 // Linear search function for each thread
 void* ThreadSearch(void* args)
 {
-    int num = current_thread++;
+    ThreadArgs* targs = (ThreadArgs*)args;
+    int start = targs->start;
+    int end = targs->end;
+    vector<int>& arr = *(targs->arr);
 
-    for (int i = num * (max / 4); i < ((num + 1) * (max / 4)); i++) {
-        if (a[i] == key)
-            f = 1;
+    for (int i = start; i <= end; i++) {
+        if (arr[i] == key) {
+            found = true;
+            break;
+        }
     }
     return NULL;
 }
 
-// Function to read array from file
-bool ReadArrayFromFile(const string& filename, vector<int>& arr) {
-    ifstream file(filename);
-    if (!file.is_open()) {
-        cout << "Error: Unable to open file " << filename << endl;
-        return false;
-    }
 
-    int value;
-    while (file >> value) {
-        arr.push_back(value);
-    }
-    file.close();
-    return true;
-}
-
-// Driver code
 int main(int argc, char* argv[])
 {
     if (argc != 2) {
@@ -53,33 +47,49 @@ int main(int argc, char* argv[])
     }
 
     string filename = argv[1];
-    vector<int> arr;
 
-    if (!ReadArrayFromFile(filename, arr))
+    ifstream file(filename);
+    if (!file.is_open()) {
+        cout << "Error: Unable to open file " << filename << endl;
         return 1;
-
-    // Copy vector to array
-    for (int i = 0; i < max; ++i) {
-        if (i < arr.size())
-            a[i] = arr[i];
-        else
-            a[i] = 0; // Fill remaining elements with 0
     }
 
-    pthread_t thread[thread_max];
+    vector<int> arr;
+    int value;
+    while (file >> value) {
+        arr.push_back(value);
+    }
+    file.close();
 
-    for (int i = 0; i < thread_max; i++) {
-        pthread_create(&thread[i], NULL, ThreadSearch, (void*)NULL);
+    pthread_t threads[MAX_THREAD];
+    ThreadArgs args[MAX_THREAD];
+    
+	using namespace std::chrono;
+	auto start_time = high_resolution_clock::now(); // Start time before search
+	
+    int chunk_size = arr.size() / MAX_THREAD;
+    for (int i = 0; i < MAX_THREAD; i++) {
+        args[i].start = i * chunk_size;
+        args[i].end = (i == MAX_THREAD - 1) ? arr.size() - 1 : (i + 1) * chunk_size - 1;
+        args[i].arr = &arr; 
+        pthread_create(&threads[i], NULL, ThreadSearch, (void*)&args[i]);
     }
 
-    for (int i = 0; i < thread_max; i++) {
-        pthread_join(thread[i], NULL);
+    for (int i = 0; i < MAX_THREAD; i++) {
+        pthread_join(threads[i], NULL);
     }
 
-    if (f == 1)
-        cout << "Key element found" << endl;
+    if (found)
+        cout << key << " found in array" << endl;
     else
-        cout << "Key not present" << endl;
+        cout << key << " not found in array" << endl;
+        
+     auto end_time = high_resolution_clock::now();    // End time after search
+
+    // Calculate elapsed time in milliseconds
+    duration<double, milli> elapsed_time = end_time - start_time;
+
+    cout << "Search time: " << elapsed_time.count() << " milliseconds" << endl;
 
     return 0;
 }
