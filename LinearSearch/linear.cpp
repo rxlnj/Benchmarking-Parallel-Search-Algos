@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
     }
     file.close();
 
-    int key = 133795; // Key to search
+    int key = 820767; // Key to search
 
     using namespace std::chrono;
 

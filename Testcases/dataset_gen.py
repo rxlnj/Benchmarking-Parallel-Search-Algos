@@ -43,7 +43,7 @@ if __name__ == "__main__":
     if not any(vars(args).values()):
         parser.print_help()
     else:
-        size = args.s if args.s else 1000000
+        size = args.s if args.s else 1000
         min_value = args.min if args.min else 1
         max_value = args.max if args.max else min_value + size - 1
 

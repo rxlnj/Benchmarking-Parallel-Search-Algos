@@ -9,7 +9,7 @@
 #include <chrono>
 using namespace std;
 
-#define MAX_THREAD 4
+#define MAX_THREAD 8
 
 bool found = false;
 int part = 0;
