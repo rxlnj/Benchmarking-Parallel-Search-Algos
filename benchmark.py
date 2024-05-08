@@ -27,7 +27,7 @@ time_patterns = {
 def run_implementation(impl_name, use_mpi, dataset_size):
     dataset_path = f"Testcases/dataset_{dataset_size}.txt"
     if use_mpi:
-        cmd = ["mpirun", "-n", "8", "bin/" + impl_name, dataset_path]
+        cmd = ["mpirun", "-n", "2", "bin/" + impl_name, dataset_path]
     else:
         cmd = ["./bin/" + impl_name, dataset_path]
     

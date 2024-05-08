@@ -4,17 +4,18 @@
 #include <vector>
 #include <string>
 #include <omp.h>
-#include <chrono>
 using namespace std;
 
 // Function to perform linear search
 int LinearSearch(const vector<int>& arr, int key, int start, int end) {
+    int result = -1;
     for (int i = start; i < end; ++i) {
         if (arr[i] == key) {
-            return i; // Key found
+            result = i; // Key found
+            break;
         }
     }
-    return -1; // Key not found
+    return result; // Key not found
 }
 
 int main(int argc, char *argv[]) {
@@ -42,9 +43,8 @@ int main(int argc, char *argv[]) {
     int found_index = -1;
     int found_thread = -1;
 
-    using namespace std::chrono;
 
-    auto start_time = high_resolution_clock::now(); // Start time before search
+    auto start_time = omp_get_wtime(); // Start time before search
     #pragma omp parallel num_threads(8)
     {
         int thread_id = omp_get_thread_num();
@@ -69,12 +69,12 @@ int main(int argc, char *argv[]) {
         cout << "Key element not found" << endl;
     }
 
-    auto end_time = high_resolution_clock::now();    // End time after search
+    auto end_time = omp_get_wtime();   // End time after search
 
     // Calculate elapsed time in milliseconds
-    duration<double, milli> elapsed_time = end_time - start_time;
+    double elapsed_time = end_time - start_time;
 
-    cout << "Search time: " << elapsed_time.count() << " milliseconds" << endl;
+    cout << "Search time: " << elapsed_time * 1000 << " milliseconds" << endl;
 
     return 0;
 }
