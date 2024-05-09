@@ -14,13 +14,14 @@ BIN:
 	$(MKDIR) bin
 
 BINARYSEARCH: BIN
+	g++ -o bin/binary_seq$(EXE_EXT) BinarySearch/binary.cpp
 	g++ -pthread -o bin/binary_pthread$(EXE_EXT) BinarySearch/binarypthreads.cpp
 	mpic++ -o bin/binary_mpi$(EXE_EXT) BinarySearch/binarympi.cpp
 	g++ -fopenmp -o bin/binary_omp$(EXE_EXT) BinarySearch/binaryopenmp.cpp
 
 LINEARSEARCH: BIN
 	g++ -pthread -o bin/linear_pthread$(EXE_EXT) LinearSearch/linearpthreads.cpp
-	g++ -o bin/linear$(EXE_EXT) LinearSearch/linear.cpp
+	g++ -o bin/linear_seq$(EXE_EXT) LinearSearch/linear.cpp
 	mpic++ -o bin/linear_mpi$(EXE_EXT) LinearSearch/linearmpi.cpp
 	g++ -fopenmp -o bin/linear_omp$(EXE_EXT) LinearSearch/linearopenmp.cpp
 
